@@ -29,7 +29,7 @@ class OvenTest {
 
         Oven oven = new Oven(heatingModuleMock,fanMock);
 
-        BakingProgram bakingProgram=BakingProgram.builder().build();
+        BakingProgram bakingProgram=BakingProgram.builder().withInitialTemp(0).build();
 
 
         oven.start(bakingProgram);
@@ -38,7 +38,6 @@ class OvenTest {
                 .withTargetTemp(bakingProgram.getInitialTemp())
                 .withTimeInMinutes(HEAT_UP_AND_FINISH_SETTING_TIME)
                 .build());
-
 
     }
 
