@@ -72,6 +72,7 @@ class OvenTest {
         ProgramStage stage1=ProgramStage.builder().withStageTime(10).withTargetTemp(120).withHeat(HeatType.THERMO_CIRCULATION).build();
         ProgramStage stage2=ProgramStage.builder().withStageTime(10).withTargetTemp(140).withHeat(HeatType.GRILL).build();
 
+
         List<ProgramStage> list=List.of(stage1,stage2);
 
         BakingProgram bakingProgram=BakingProgram.builder()
@@ -84,5 +85,34 @@ class OvenTest {
 
 
     }
+
+    @Test
+    void shouldRunHeaterOneTimeWithOnFan()  {
+
+        Oven oven = new Oven(heatingModuleMock,fanMock);
+
+        ProgramStage stage1=ProgramStage.builder().withStageTime(10).withTargetTemp(120).withHeat(HeatType.THERMO_CIRCULATION).build();
+        ProgramStage stage2=ProgramStage.builder().withStageTime(10).withTargetTemp(160).withHeat(HeatType.HEATER).build();
+
+        List<ProgramStage> list=List.of(stage1,stage2);
+
+        BakingProgram bakingProgram=BakingProgram.builder()
+                .withInitialTemp(100)
+                .withStages(list).build();
+
+        when(fanMock.isOn()).thenReturn(true);
+
+        oven.start(bakingProgram);
+
+        verify(heatingModuleMock,times(1)).heater(HeatingSettings.builder().withTimeInMinutes(10).withTargetTemp(160).build());
+        verify(fanMock,times(2)).off();
+        verify(fanMock,times(1)).on();
+
+
+    }
+
+
+
+
 
 }
