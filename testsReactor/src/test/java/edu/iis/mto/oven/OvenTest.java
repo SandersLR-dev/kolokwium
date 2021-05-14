@@ -111,6 +111,37 @@ class OvenTest {
 
     }
 
+    @Test
+    void shouldRunHeaterTwoTimesGrillTwoTimesAndThermalCirculationThreeTimes() throws HeatingException {
+
+        Oven oven = new Oven(heatingModuleMock,fanMock);
+
+        ProgramStage stage1=ProgramStage.builder().withStageTime(10).withTargetTemp(120).withHeat(HeatType.THERMO_CIRCULATION).build();
+        ProgramStage stage2=ProgramStage.builder().withStageTime(10).withTargetTemp(160).withHeat(HeatType.HEATER).build();
+        ProgramStage stage3=ProgramStage.builder().withStageTime(10).withTargetTemp(180).withHeat(HeatType.GRILL).build();
+        ProgramStage stage4=ProgramStage.builder().withStageTime(10).withTargetTemp(120).withHeat(HeatType.THERMO_CIRCULATION).build();
+        ProgramStage stage5=ProgramStage.builder().withStageTime(10).withTargetTemp(160).withHeat(HeatType.HEATER).build();
+        ProgramStage stage6=ProgramStage.builder().withStageTime(10).withTargetTemp(180).withHeat(HeatType.GRILL).build();
+        ProgramStage stage7=ProgramStage.builder().withStageTime(10).withTargetTemp(120).withHeat(HeatType.THERMO_CIRCULATION).build();
+
+        List<ProgramStage> list=List.of(stage1,stage2,stage3,stage4,stage5,stage6,stage7);
+
+        BakingProgram bakingProgram=BakingProgram.builder()
+                .withInitialTemp(100)
+                .withStages(list).build();
+
+        when(fanMock.isOn()).thenReturn(true);
+
+        oven.start(bakingProgram);
+
+        verify(heatingModuleMock,times(2)).heater(HeatingSettings.builder().withTimeInMinutes(10).withTargetTemp(160).build());
+        verify(heatingModuleMock,times(2)).grill(HeatingSettings.builder().withTimeInMinutes(10).withTargetTemp(180).build());
+        verify(heatingModuleMock,times(3)).termalCircuit(HeatingSettings.builder().withTimeInMinutes(10).withTargetTemp(120).build());
+
+        verify(fanMock,times(7)).off();
+        verify(fanMock,times(3)).on();
+    }
+
 
 
 
