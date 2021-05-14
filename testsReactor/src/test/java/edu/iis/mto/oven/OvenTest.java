@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class OvenTest {
 
@@ -39,5 +41,29 @@ class OvenTest {
 
 
     }
+
+    @Test
+    void shouldThrowOvenExceptionWithThermoCirculation() throws HeatingException {
+
+        Oven oven = new Oven(heatingModuleMock,fanMock);
+
+        ProgramStage stage1=ProgramStage.builder().withStageTime(10).withTargetTemp(120).withHeat(HeatType.THERMO_CIRCULATION).build();
+        ProgramStage stage2=ProgramStage.builder().withStageTime(10).withTargetTemp(140).withHeat(HeatType.HEATER).build();
+
+        List<ProgramStage> list=List.of(stage1,stage2);
+
+        BakingProgram bakingProgram=BakingProgram.builder()
+                .withInitialTemp(100)
+                .withStages(list).build();
+
+
+        doThrow(HeatingException.class).when(heatingModuleMock).termalCircuit(HeatingSettings.builder().withTargetTemp(120).withTimeInMinutes(10).build());
+
+        assertThrows(OvenException.class,()->oven.start(bakingProgram));
+
+
+    }
+
+
 
 }
